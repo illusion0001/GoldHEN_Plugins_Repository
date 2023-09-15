@@ -16,6 +16,20 @@ HOOK_INIT(fopen);
 
 char titleid[16];
 
+int32_t sceFiosFHOpen(
+    const void *arg1,
+    int32_t *out_handle,
+    const char *file_path,
+    const void *arg4
+);
+
+int32_t sceFiosFHOpenSync(
+    const void *arg1,
+    int32_t *out_handle,
+    const char *file_path,
+    const void *arg4
+);
+
 FILE* fopen_hook(const char *path, const char *mode)
 {
     FILE* fp = NULL;
