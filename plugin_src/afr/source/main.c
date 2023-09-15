@@ -10,14 +10,16 @@ attr_public const char *g_pluginDesc = "Application File Redirector";
 attr_public const char *g_pluginAuth = "jocover, SiSTR0";
 attr_public u32 g_pluginVersion = 0x00000100; // 1.00
 
+int32_t sceFiosFHOpen(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4);
+int32_t sceFiosFHOpenSync(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4);
+
+HOOK_INIT(sceFiosFHOpen);
+HOOK_INIT(sceFiosFHOpenSync);
 HOOK_INIT(sceKernelOpen);
 HOOK_INIT(sceKernelStat);
 HOOK_INIT(fopen);
 
 char titleid[16];
-
-int32_t sceFiosFHOpen(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4);
-int32_t sceFiosFHOpenSync(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4);
 
 FILE* fopen_hook(const char *path, const char *mode)
 {
@@ -105,6 +107,16 @@ s32 sceKernelOpen_hook(const char *path, s32 flags, OrbisKernelMode mode)
     return fd;
 }
 
+int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
+{
+    return 0;
+}
+
+int32_t sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
+{
+    return 0;
+}
+
 s32 attr_public plugin_load(s32 argc, const char* argv[])
 {
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
@@ -115,6 +127,8 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
         memcpy(titleid, procInfo.titleid, sizeof(titleid));
         print_proc_info();
     }
+    HOOK32(sceFiosFHOpen);
+    HOOK32(sceFiosFHOpenSync);
     HOOK32(sceKernelOpen);
     HOOK32(sceKernelStat);
     HOOK32(fopen);
@@ -124,6 +138,8 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
 s32 attr_public plugin_unload(s32 argc, const char* argv[])
 {
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
+    UNHOOK(sceFiosFHOpen);
+    UNHOOK(sceFiosFHOpenSync);
     UNHOOK(sceKernelOpen);
     UNHOOK(sceKernelStat);
     UNHOOK(fopen);
