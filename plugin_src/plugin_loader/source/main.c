@@ -38,21 +38,21 @@ void create_template_config(void)
 {
     final_printf("Creating new %s file\n", PLUGIN_CONFIG_PATH);
     // compile time
-    #define DEFAULT_INI_DATA "" \
-                            "[" PLUGIN_SETTINGS_SECTION "]\n" \
-                            "; Global settings for plugin loader.\n" \
-                            "; Affects every app/process boot.\n" \
-                            "show_load_notification=true\n" \
-                            "; Details for show_load_notification\n" \
-                            "; Shows how many plugins were successfully loaded.\n" \
-                            "; Valid options: false or true.\n" \
-                            "\n" \
-                            "; Load plugins in default section regardless of Title ID\n" \
-                            "[default]\n" \
-                            ";/data/GoldHEN/plugins/example.prx\n" \
-                            ";/data/GoldHEN/plugins/example2.prx\n" \
-                            "\n" \
-                            "; Note: text following the ; are comments\n"
+#define DEFAULT_INI_DATA "" \
+                        "[" PLUGIN_SETTINGS_SECTION "]\n" \
+                        "; Global settings for plugin loader.\n" \
+                        "; Affects every app/process boot.\n" \
+                        "show_load_notification=true\n" \
+                        "; Details for show_load_notification\n" \
+                        "; Shows how many plugins were successfully loaded.\n" \
+                        "; Valid options: false or true.\n" \
+                        "\n" \
+                        "; Load plugins in default section regardless of Title ID\n" \
+                        "[default]\n" \
+                        ";/data/GoldHEN/plugins/example.prx\n" \
+                        ";/data/GoldHEN/plugins/example2.prx\n" \
+                        "\n" \
+                        "; Note: text following the ; are comments\n"
 
     // Does not work, may not have write access.
     //FILE* f = fopen(PLUGIN_CONFIG_PATH, "w");
@@ -69,6 +69,7 @@ void create_template_config(void)
     }
 
     sceKernelWrite(f, DEFAULT_INI_DATA, strlen(DEFAULT_INI_DATA));
+#undef DEFAULT_INI_DATA
     sceKernelClose(f);
 }
 
