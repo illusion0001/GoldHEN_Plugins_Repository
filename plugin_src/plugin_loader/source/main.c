@@ -158,7 +158,7 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
         } else if (result < 0)
         {
             final_printf("Error loading Plugin %s! Error code 0x%08x (%i)\n", entry->key, result, result);
-        } else
+        } else if (result > 0)
         {
             int32_t ret = 0;
             bool load_success = false;
