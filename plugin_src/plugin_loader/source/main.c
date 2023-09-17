@@ -151,14 +151,15 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
         chmod(entry->key, 0777);
         sceKernelChmod(entry->key, 0777);
         final_printf("Starting %s\n", entry->key);
-        int32_t result = sceKernelLoadStartModule(entry->key, 0, 0, 0, NULL, NULL);
+        int32_t prx_load = 0;
+        int32_t result = sceKernelLoadStartModule(entry->key, 0, 0, 0, NULL, &prx_load);
         if (result == 0x80020002)
         {
             final_printf("Plugin %s not found\n", entry->key);
         } else if (result < 0)
         {
             final_printf("Error loading Plugin %s! Error code 0x%08x (%i)\n", entry->key, result, result);
-        } else if (result > 0)
+        } else
         {
             int32_t ret = 0;
             bool load_success = false;
