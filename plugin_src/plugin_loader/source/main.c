@@ -175,6 +175,7 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
             final_printf("plugin_load Dlsym 0x%08x @ 0x%p\n", ret, plugin_load_ret);
             ret = sceKernelDlsym(result, "plugin_unload", (void**)&plugin_unload_ret);
             final_printf("plugin_unload Dlsym 0x%08x @ 0x%p\n", ret, plugin_unload_ret);
+        }
             if (plugin_load_ret && plugin_unload_ret)
             {
                 final_printf("Starting plugin...\n");
@@ -198,6 +199,12 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
                 final_printf("Unable to find plugin_load or plugin_unload!\n");
                 load_success = false;
                 continue;
+            }
+            if (prx_load)
+            {
+                final_printf("plugin_load exit successful 0x%08x\n", prx_load);
+                *load_count += 1;
+                load_success = true;
             }
             char plugin_entry[128] = {0};
             if (ModuleName && load_success)
@@ -224,7 +231,6 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
                 final_printf("plugin_entry: %s\n", plugin_entry);
                 final_printf("strlen(plugin_entry): %li\n", strlen(plugin_entry));
             }
-        }
     }
 }
 
