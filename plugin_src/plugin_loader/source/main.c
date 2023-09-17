@@ -155,6 +155,8 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
         int32_t prx_load = 0;
         bool load_success = false;
         char** ModuleName = NULL;
+        int32_t(*plugin_load_ret)(void) = NULL;
+        int32_t(*plugin_unload_ret)(void) = NULL;
         int32_t result = sceKernelLoadStartModule(entry->key, 0, 0, 0, NULL, &prx_load);
         if (result == 0x80020002)
         {
@@ -166,8 +168,6 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
         {
             int32_t ret = 0;
             // TODO: accept user provided arguments
-            int32_t(*plugin_load_ret)(void) = NULL;
-            int32_t(*plugin_unload_ret)(void) = NULL;
             ret = sceKernelDlsym(result, "g_pluginName", (void**)&ModuleName);
             final_printf("Loaded Plugin %s\n", entry->key);
             final_printf("Plugin Handle 0x%08x Dlsym 0x%08x\n", result, ret);
