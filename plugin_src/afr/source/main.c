@@ -19,7 +19,7 @@ HOOK_INIT(sceKernelOpen);
 HOOK_INIT(sceKernelStat);
 HOOK_INIT(fopen);
 
-char titleid[16];
+char titleid[16] = {0};
 
 FILE* fopen_hook(const char *path, const char *mode)
 {
@@ -109,11 +109,24 @@ s32 sceKernelOpen_hook(const char *path, s32 flags, OrbisKernelMode mode)
 
 int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
+    int32_t fd = 0;
+    fd = sceKernelOpen(file_path, 0, 644);
+    if (fd > 0)
+    {
+        out_handle = fd;
+    }
+    else
+    {
+        return HOOK_CONTINUE(sceFiosFHOpen,
+                       s32 (*)(const void *, int32_t *, const char *, const void *),
+                       arg1, out_handle, file_path, arg4);
+    }
     return 0;
 }
 
 int32_t sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
+    int32_t fd = 0;
     return 0;
 }
 
