@@ -40,7 +40,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: illusion0001/mxml
-        ref: patch-1
+        ref: clang-14
         path: mxml
 
     - name: Setup variables
