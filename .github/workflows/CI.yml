@@ -43,8 +43,9 @@ jobs:
         ref: clang-14
         path: mxml
 
-    - name: Setup variables
+    - name: Setup environment
       run: |
+        sudo apt install llvm
         echo "llvm_path=$RUNNER_TOOL_CACHE/llvm" >> $GITHUB_ENV
         echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
         echo "commit_ver=1.$(git rev-list HEAD --count)" >> $GITHUB_ENV
