@@ -135,6 +135,28 @@ int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *fi
 int32_t sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
     int32_t fd = 0;
+    if (file_path[0] != '/')
+    {
+        char possible_path[MAX_PATH_] = {0};
+        snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path);
+        fd = sceKernelOpen(file_path, 0, 644);
+    }
+    else if (file_path[0] == '/')
+    {
+        char possible_path[MAX_PATH_] = {0};
+        snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path + 1);
+        fd = sceKernelOpen(file_path, 0, 644);
+    }
+    if (fd > 0)
+    {
+        *out_handle = fd;
+    }
+    else
+    {
+        return HOOK_CONTINUE(sceFiosFHOpenSync,
+                       s32 (*)(const void *, int32_t *, const char *, const void *),
+                       arg1, out_handle, file_path, arg4);
+    }
     return 0;
 }
 
