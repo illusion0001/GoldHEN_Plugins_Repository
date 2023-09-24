@@ -153,7 +153,8 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
     boot_ver();
     struct proc_info procInfo;
     if (!sys_sdk_proc_info(&procInfo)) {
-        memcpy(titleid, procInfo.titleid, sizeof(titleid));
+        bzero(titleid, sizeof(titleid));
+        strcpy(titleid, procInfo.titleid);
         print_proc_info();
     }
     HOOK32(sceFiosFHOpen);
