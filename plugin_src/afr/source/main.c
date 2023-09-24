@@ -27,8 +27,7 @@ FILE* fopen_hook(const char *path, const char *mode)
     if (path[0] == '/' && path[1] == 'a' && path[2] == 'p' && path[3] == 'p' &&
         path[4] == '0' && strlen(path) > 6)
     {
-        char possible_path[MAX_PATH_];
-        memset(possible_path, 0, sizeof(possible_path));
+        char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, path + 6);
 
         fp = HOOK_CONTINUE(fopen,
@@ -57,8 +56,7 @@ s32 sceKernelStat_hook(char *path, struct stat* stat_buf)
     if (path[0] == '/' && path[1] == 'a' && path[2] == 'p' && path[3] == 'p' &&
         path[4] == '0' && strlen(path) > 6 )
     {
-        char possible_path[MAX_PATH_];
-        memset(possible_path, 0, sizeof(possible_path));
+        char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, path + 6);
 
         ret_pos = stat(possible_path, stat_buf);
@@ -84,8 +82,7 @@ s32 sceKernelOpen_hook(const char *path, s32 flags, OrbisKernelMode mode)
     if (path[0] == '/' && path[1] == 'a' && path[2] == 'p' && path[3] == 'p' &&
         path[4] == '0' && strlen(path) > 6) {
 
-        char possible_path[MAX_PATH_];
-        memset(possible_path, 0, sizeof(possible_path));
+        char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, path + 6);
         fd = HOOK_CONTINUE(sceKernelOpen,
                            s32 (*)(const char *, s32, OrbisKernelMode),
@@ -110,7 +107,18 @@ s32 sceKernelOpen_hook(const char *path, s32 flags, OrbisKernelMode mode)
 int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
     int32_t fd = 0;
-    fd = sceKernelOpen(file_path, 0, 644);
+    if (file_path[0] != '/')
+    {
+        char possible_path[MAX_PATH_] = {0};
+        snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path);
+        fd = sceKernelOpen(file_path, 0, 644);
+    }
+    else if (file_path[0] == '/')
+    {
+        char possible_path[MAX_PATH_] = {0};
+        snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path + 1);
+        fd = sceKernelOpen(file_path, 0, 644);
+    }
     if (fd > 0)
     {
         *out_handle = fd;
