@@ -109,10 +109,12 @@ int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *fi
     int32_t fd = 0;
     char possible_path[MAX_PATH_] = {0};
     snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
-    fd = sceKernelOpen(file_path, 0, 644);
+    fd = sceKernelOpen(possible_path, 0, 644);
     if (fd > 0)
     {
         *out_handle = fd;
+        debug_printf("possible_path: %s\n", possible_path);
+        debug_printf("*out_handle: %d\n", *out_handle);
     }
     else
     {
@@ -125,14 +127,15 @@ int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *fi
 
 int32_t sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
-
     int32_t fd = 0;
     char possible_path[MAX_PATH_] = {0};
     snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
-    fd = sceKernelOpen(file_path, 0, 644);
+    fd = sceKernelOpen(possible_path, 0, 644);
     if (fd > 0)
     {
         *out_handle = fd;
+        debug_printf("possible_path: %s\n", possible_path);
+        debug_printf("*out_handle: %d\n", *out_handle);
     }
     else
     {
