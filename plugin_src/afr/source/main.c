@@ -139,13 +139,13 @@ int32_t sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char
     {
         char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path);
-        fd = sceKernelOpen(file_path, 0, 644);
+        fd = sceKernelOpen(possible_path, 0, 644);
     }
     else if (file_path[0] == '/')
     {
         char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, file_path + 1);
-        fd = sceKernelOpen(file_path, 0, 644);
+        fd = sceKernelOpen(possible_path, 0, 644);
     }
     if (fd > 0)
     {
