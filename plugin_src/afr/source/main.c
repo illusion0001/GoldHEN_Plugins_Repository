@@ -113,7 +113,7 @@ int32_t sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *fi
     fd = sceKernelOpen(file_path, 0, 644);
     if (fd > 0)
     {
-        out_handle = fd;
+        *out_handle = fd;
     }
     else
     {
