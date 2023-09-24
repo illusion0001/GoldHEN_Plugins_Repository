@@ -45,7 +45,6 @@ jobs:
 
     - name: Setup variables
       run: |
-        echo "llvm_ver=12.0" >> $GITHUB_ENV
         echo "llvm_path=$RUNNER_TOOL_CACHE/llvm" >> $GITHUB_ENV
         echo "OO_PS4_TOOLCHAIN=$GITHUB_WORKSPACE/OpenOrbis/PS4Toolchain" >> $GITHUB_ENV
         echo "commit_ver=1.$(git rev-list HEAD --count)" >> $GITHUB_ENV
@@ -53,20 +52,6 @@ jobs:
 
     - name: Download OpenOrbis Toolchain
       run: curl -sL https://github.com/illusion0001/OpenOrbis-PS4-Toolchain/releases/latest/download/toolchain.tar.gz | tar xz -C ./
-
-    - name: Cache LLVM and Clang (${{ env.llvm_ver }})
-      id: cache-llvm
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.llvm_path }}
-        key: llvm-${{ env.llvm_ver }}
-
-    - name: Install LLVM and Clang (${{ env.llvm_ver }})
-      uses: KyleMayes/install-llvm-action@v1
-      with:
-        version: ${{ env.llvm_ver }}
-        directory: ${{ env.llvm_path }}
-        cached: ${{ steps.cache-llvm.outputs.cache-hit }}
 
     - name: Install mini xml
       working-directory: mxml/ps4
