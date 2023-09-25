@@ -160,7 +160,7 @@ s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_p
     else
     {
         int32_t ret = sceFiosFHOpen(arg1, out_handle, file_path, arg4);
-        debug_printf("sceFiosFHOpen: 0x%08x", ret);
+        debug_printf("sceFiosFHOpen: 0x%08x\n", ret);
         debug_printf("*out_handle: %d\n", *out_handle);
         return ret;
     }
@@ -186,7 +186,7 @@ s32 sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *fi
     else
     {
         int32_t ret = sceFiosFHOpenSync(arg1, out_handle, file_path, arg4);
-        debug_printf("sceFiosFHOpen: 0x%08x", ret);
+        debug_printf("sceFiosFHOpenSync: 0x%08x\n", ret);
         debug_printf("*out_handle: %d\n", *out_handle);
         return ret;
     }
