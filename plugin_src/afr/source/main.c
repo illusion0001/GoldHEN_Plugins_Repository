@@ -107,6 +107,10 @@ s32 sceKernelOpen_hook(const char *path, s32 flags, OrbisKernelMode mode)
 
 s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
+    debug_printf("arg1: %p\n", arg1);
+    debug_printf("*out_handle: %p\n", *out_handle);
+    debug_printf("file_path: %s\n", file_path);
+    debug_printf("arg4: %p\n", arg4);
     s32 fd = 0;
     char possible_path[MAX_PATH_] = {0};
     snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
@@ -128,6 +132,10 @@ s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_p
 
 s32 sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *file_path, const void *arg4)
 {
+    debug_printf("arg1: %p\n", arg1);
+    debug_printf("*out_handle: %p\n", *out_handle);
+    debug_printf("file_path: %s\n", file_path);
+    debug_printf("arg4: %p\n", arg4);
     s32 fd = 0;
     char possible_path[MAX_PATH_] = {0};
     snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
