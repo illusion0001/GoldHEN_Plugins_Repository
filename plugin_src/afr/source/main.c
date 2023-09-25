@@ -20,6 +20,30 @@ HOOK_INIT(sceKernelOpen);
 HOOK_INIT(sceKernelStat);
 HOOK_INIT(fopen);
 
+void sys_proc_rw(const uintptr_t Address, const void *Data, const uint64_t Length)
+{
+    if (!Address || !Length)
+    {
+        final_printf("No target (0x%lx) or length (%li) provided!\n", Address, Length);
+        return;
+    }
+    struct proc_rw process_rw_data;
+    bzero(&process_rw_data, sizeof(process_rw_data));
+    process_rw_data.address = Address;
+    process_rw_data.data = Data;
+    process_rw_data.length = Length;
+    process_rw_data.write_flags = 1;
+    sys_sdk_proc_rw(&process_rw_data);
+}
+
+void WriteJump64(const uintptr_t jump_src, const uintptr_t jump_dst)
+{
+    const uint8_t jump_ptr[] = { 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
+                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } // ptr
+    sys_proc_rw(jump_src, jump_ptr, sizeof(jump_ptr));
+    sys_proc_rw(jump_src, &jump_dst, sizeof(uintptr_t));
+}
+
 char titleid[16] = {0};
 
 FILE* fopen_hook(const char *path, const char *mode)
