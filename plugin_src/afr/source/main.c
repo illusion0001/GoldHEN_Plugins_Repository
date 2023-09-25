@@ -4,6 +4,7 @@
 
 #include "Common.h"
 #include "plugin_common.h"
+#include <sys/fcntl.h>
 
 attr_public const char *g_pluginName = "afr";
 attr_public const char *g_pluginDesc = "Application File Redirector";
