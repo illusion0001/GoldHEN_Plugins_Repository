@@ -4,6 +4,7 @@
 
 #include "Common.h"
 #include "plugin_common.h"
+#include <stdbool.h>
 #include <sys/fcntl.h>
 
 attr_public const char *g_pluginName = "afr";
