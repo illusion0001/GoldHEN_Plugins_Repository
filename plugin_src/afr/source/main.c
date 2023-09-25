@@ -39,7 +39,7 @@ void sys_proc_rw(const uintptr_t Address, const void *Data, const uint64_t Lengt
 void WriteJump64(const uintptr_t jump_src, const uintptr_t jump_dst)
 {
     const uint8_t jump_ptr[] = { 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
-                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } // ptr
+                                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // ptr
     sys_proc_rw(jump_src, jump_ptr, sizeof(jump_ptr));
     sys_proc_rw(jump_src, &jump_dst, sizeof(uintptr_t));
 }
