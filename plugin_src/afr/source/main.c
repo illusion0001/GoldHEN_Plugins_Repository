@@ -147,9 +147,7 @@ s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_p
     }
     else
     {
-        return HOOK_CONTINUE(sceFiosFHOpen,
-                       s32 (*)(const void *, int32_t *, const char *, const void *),
-                       arg1, out_handle, file_path, arg4);
+        return sceFiosFHOpen(arg1, out_handle, file_path, arg4);
     }
     return 0;
 }
@@ -172,9 +170,7 @@ s32 sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *fi
     }
     else
     {
-        return HOOK_CONTINUE(sceFiosFHOpenSync,
-                       s32 (*)(const void *, int32_t *, const char *, const void *),
-                       arg1, out_handle, file_path, arg4);
+        return sceFiosFHOpenSync(arg1, out_handle, file_path, arg4);
     }
     return 0;
 }
@@ -192,8 +188,10 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
         strcpy(titleid, procInfo.titleid);
         print_proc_info();
     }
-    HOOK32(sceFiosFHOpen);
-    HOOK32(sceFiosFHOpenSync);
+    WriteJump64(0x017f5e60, uintptr_t(&sceFiosFHOpen_hook));
+    WriteJump64(0x017f5e50, uintptr_t(&sceFiosFHOpenSync_hook));
+    // HOOK32(sceFiosFHOpen);
+    // HOOK32(sceFiosFHOpenSync);
     HOOK32(sceKernelOpen);
     HOOK32(sceKernelStat);
     HOOK32(fopen);
@@ -203,8 +201,8 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
 s32 attr_public plugin_unload(s32 argc, const char* argv[])
 {
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
-    UNHOOK(sceFiosFHOpen);
-    UNHOOK(sceFiosFHOpenSync);
+    // UNHOOK(sceFiosFHOpen);
+    // UNHOOK(sceFiosFHOpenSync);
     UNHOOK(sceKernelOpen);
     UNHOOK(sceKernelStat);
     UNHOOK(fopen);
