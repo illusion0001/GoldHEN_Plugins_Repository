@@ -41,13 +41,21 @@ void sys_proc_rw(const uintptr_t Address, const void *Data, const uint64_t Lengt
     process_rw_data.length = Length;
     process_rw_data.write_flags = 1;
 #if (__FINAL__) == 0
-    debug_printf("process_rw_data: %p\n", &process_rw_data);
+    process_rw_data.write_flags = 0;
     debug_printf("address: 0x%lx\n", process_rw_data.address);
+    debug_printf("before write:\n");
+    debug_printf("sys_sdk_proc_rw(&process_rw_data): 0x%08x\n", sys_sdk_proc_rw(&process_rw_data));
     debug_printf("hex_dump: ");
     hex_dump(process_rw_data.data, process_rw_data.length);
-    debug_printf("length: 0x%lx\n", process_rw_data.length);
-    int32_t ret = sys_sdk_proc_rw(&process_rw_data);
-    debug_printf("sys_sdk_proc_rw: returned 0x%08x\n", ret);
+    debug_printf("after write:\n");
+    bzero(&process_rw_data, sizeof(process_rw_data));
+    process_rw_data.address = Address;
+    process_rw_data.data = Data;
+    process_rw_data.length = Length;
+    process_rw_data.write_flags = 1;
+    debug_printf("sys_sdk_proc_rw(&process_rw_data): 0x%08x\n", sys_sdk_proc_rw(&process_rw_data));
+    debug_printf("hex_dump: ");
+    hex_dump(process_rw_data.data, process_rw_data.length);
 #else
     sys_sdk_proc_rw(&process_rw_data);
 #endif
