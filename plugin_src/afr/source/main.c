@@ -218,9 +218,9 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
     WriteJump64(0x017f5e50, (uintptr_t)&sceFiosFHOpenSync_hook);
     // HOOK32(sceFiosFHOpen);
     // HOOK32(sceFiosFHOpenSync);
-    HOOK32(sceKernelOpen);
-    HOOK32(sceKernelStat);
-    HOOK32(fopen);
+    // HOOK32(sceKernelOpen);
+    // HOOK32(sceKernelStat);
+    // HOOK32(fopen);
     return 0;
 }
 
@@ -229,9 +229,9 @@ s32 attr_public plugin_unload(s32 argc, const char* argv[])
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
     // UNHOOK(sceFiosFHOpen);
     // UNHOOK(sceFiosFHOpenSync);
-    UNHOOK(sceKernelOpen);
-    UNHOOK(sceKernelStat);
-    UNHOOK(fopen);
+    // UNHOOK(sceKernelOpen);
+    // UNHOOK(sceKernelStat);
+    // UNHOOK(fopen);
     return 0;
 }
 
