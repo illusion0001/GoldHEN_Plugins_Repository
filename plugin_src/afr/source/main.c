@@ -188,8 +188,8 @@ s32 attr_public plugin_load(s32 argc, const char* argv[])
         strcpy(titleid, procInfo.titleid);
         print_proc_info();
     }
-    WriteJump64(0x017f5e60, uintptr_t(&sceFiosFHOpen_hook));
-    WriteJump64(0x017f5e50, uintptr_t(&sceFiosFHOpenSync_hook));
+    WriteJump64(0x017f5e60, (uintptr_t)&sceFiosFHOpen_hook);
+    WriteJump64(0x017f5e50, (uintptr_t)&sceFiosFHOpenSync_hook);
     // HOOK32(sceFiosFHOpen);
     // HOOK32(sceFiosFHOpenSync);
     HOOK32(sceKernelOpen);
