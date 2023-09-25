@@ -182,14 +182,18 @@ s32 sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *fi
     debug_printf("file_path: %s\n", file_path);
     debug_printf("arg4: %p\n", arg4);
     s32 fd = 0;
-    char possible_path[MAX_PATH_] = {0};
-    snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
-    fd = sceKernelOpen(possible_path, O_RDONLY, 0777);
-    if (fd > 0)
+    if (isApp0(file_path))
     {
-        *out_handle = fd;
-        debug_printf("possible_path: %s\n", possible_path);
-        debug_printf("*out_handle: %d\n", *out_handle);
+        char possible_path[MAX_PATH_] = {0};
+        snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
+        fd = sceKernelOpen(possible_path, O_RDONLY, 0777);
+        if (fd > 0)
+        {
+            *out_handle = fd;
+            debug_printf("possible_path: %s\n", possible_path);
+            debug_printf("*out_handle: %d\n", *out_handle);
+            return 0;
+        }
     }
     else
     {
