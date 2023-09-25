@@ -151,9 +151,9 @@ s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_p
     debug_printf("*out_handle: %x\n", *out_handle);
     debug_printf("file_path: %s\n", file_path);
     debug_printf("arg4: %p\n", arg4);
-    int32_t ret = sceFiosFHOpen(arg1, out_handle, file_path, arg4);
-    debug_printf("sceFiosFHOpen: 0x%08x\n", ret);
-    return ret;
+    // int32_t ret = sceFiosFHOpen(arg1, out_handle, file_path, arg4);
+    // debug_printf("sceFiosFHOpen: 0x%08x\n", ret);
+    return sceFiosFHOpen(arg1, out_handle, file_path, arg4);
     /*
     s32 fd = 0;
     if (isApp0(file_path))
@@ -186,9 +186,9 @@ s32 sceFiosFHOpenSync_hook(const void *arg1, int32_t *out_handle, const char *fi
     debug_printf("*out_handle: %x\n", *out_handle);
     debug_printf("file_path: %s\n", file_path);
     debug_printf("arg4: %p\n", arg4);
-    int32_t ret = sceFiosFHOpenSync(arg1, out_handle, file_path, arg4);
-    debug_printf("sceFiosFHOpenSync: 0x%08x\n", ret);
-    return ret;
+    // int32_t ret = sceFiosFHOpenSync(arg1, out_handle, file_path, arg4);
+    // debug_printf("sceFiosFHOpenSync: 0x%08x\n", ret);
+    return sceFiosFHOpenSync(arg1, out_handle, file_path, arg4);
     /*
     s32 fd = 0;
     if (isApp0(file_path))
