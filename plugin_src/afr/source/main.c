@@ -44,7 +44,6 @@ void sys_proc_rw(const uintptr_t Address, const void *Data, const uint64_t Lengt
     sys_sdk_proc_rw(&process_rw_data);
 #elif (__FINAL__) == 0
     process_rw_data.address = Address;
-    process_rw_data.data = Data;
     process_rw_data.length = Length;
     process_rw_data.write_flags = 0;
     debug_printf("address: 0x%lx\n", process_rw_data.address);
