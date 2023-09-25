@@ -53,7 +53,7 @@ void WriteJump64(const uintptr_t jump_src, const uintptr_t jump_dst)
     debug_printf("jump_src: 0x%lx\n", jump_src);
     debug_printf("jump_dst: 0x%lx\n", jump_dst);
     sys_proc_rw(jump_src, jump_ptr, sizeof(jump_ptr));
-    sys_proc_rw(jump_src, &jump_dst, sizeof(uintptr_t));
+    sys_proc_rw(jump_src+6, &jump_dst, sizeof(uintptr_t));
 }
 
 char titleid[16] = {0};
