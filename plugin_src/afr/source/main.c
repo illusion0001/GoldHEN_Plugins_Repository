@@ -40,6 +40,8 @@ void WriteJump64(const uintptr_t jump_src, const uintptr_t jump_dst)
 {
     const uint8_t jump_ptr[] = { 0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, // jmp qword ptr [$+6]
                                  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; // ptr
+    debug_printf("jump_src: 0x%lx\n", jump_src);
+    debug_printf("jump_dst: 0x%lx\n", jump_dst);
     sys_proc_rw(jump_src, jump_ptr, sizeof(jump_ptr));
     sys_proc_rw(jump_src, &jump_dst, sizeof(uintptr_t));
 }
