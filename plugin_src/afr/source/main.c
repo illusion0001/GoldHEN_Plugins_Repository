@@ -151,7 +151,7 @@ s32 sceFiosFHOpen_hook(const void *arg1, int32_t *out_handle, const char *file_p
     debug_printf("file_path: %s\n", file_path);
     debug_printf("arg4: %p\n", arg4);
     s32 fd = 0;
-    if (!isApp0(path))
+    if (!isApp0(file_path))
     {
         char possible_path[MAX_PATH_] = {0};
         snprintf(possible_path, sizeof(possible_path), GOLDHEN_PATH "/AFR/%s/%s", titleid, (file_path[0] == '/' ? file_path + 1 : file_path));
