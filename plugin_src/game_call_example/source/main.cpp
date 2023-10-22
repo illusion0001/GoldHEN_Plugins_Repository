@@ -62,6 +62,8 @@ void* my_thread(void* args)
     return NULL;
 }
 
+extern "C" {
+
 int32_t attr_public plugin_load(int32_t argc, const char* argv[])
 {
     OrbisPthread thread;
@@ -87,4 +89,6 @@ s32 attr_module_hidden module_start(s64 argc, const void *args)
 s32 attr_module_hidden module_stop(s64 argc, const void *args)
 {
     return 0;
+}
+
 }
