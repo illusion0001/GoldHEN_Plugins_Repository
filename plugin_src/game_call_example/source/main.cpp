@@ -39,10 +39,10 @@ void* my_thread(void* args)
         //MyFunc2("Hello from void* my_thread() (msgcon)\n");
 		
 		/*** code added here ***/
-	    uint64_t *nativeTablePtr = NULL;
+	    uint64_t *nativeTablePtr = (uint64_t *)(startPtr + (0x25E3528 - NO_ASLR_ADDR));
 		//memset(&nativeTablePtr, 0, sizeof(nativeTablePtr));
-	    void* gamePtr = (startPtr + (0x25E3528 - NO_ASLR_ADDR));
-		memcpy(nativeTablePtr, gamePtr, sizeof(nativeTablePtr));
+	    //void* gamePtr = ;
+		//memcpy(nativeTablePtr, gamePtr, sizeof(nativeTablePtr));
 		if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
 		{
 			// R1 + right d-pad taken from rdr ps3 menu code
