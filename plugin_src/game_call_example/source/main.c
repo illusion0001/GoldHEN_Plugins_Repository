@@ -11,6 +11,7 @@
 
 #include "plugin_common.h"
 #include <orbis/libkernel.h>
+#include "natives.h"
 
 attr_public const char *g_pluginName = "game_call_example";
 attr_public const char *g_pluginDesc = "Calling game function example";
@@ -24,16 +25,37 @@ void* my_thread(void* args)
 {
     uint64_t startPtr = procInfo.base_address;
     // Define game functions with parameters.
-    void (*MyFunc1) (int param_1) = ((void(*) (int param_1)) (startPtr + (0x0224f980 - NO_ASLR_ADDR)));
-    void (*MyFunc2) (const char *char_format, ...) = ((void(*)(const char *char_format, ...)) (startPtr + (0x0224f980 - NO_ASLR_ADDR)));
+    //void (*MyFunc1) (int param_1) = ((void(*) (int param_1)) (startPtr + (0x0224f980 - NO_ASLR_ADDR)));
+   // void (*MyFunc2) (const char *char_format, ...) = ((void(*)(const char *char_format, ...)) (startPtr + (0x0224f980 - NO_ASLR_ADDR)));
     uint32_t boot_wait = 10;
     final_printf("Sleeping for %u seconds...\n", boot_wait);
     sleep(boot_wait);
+	
+	/** added **/
+	Player myPlayer;
+	Actor myActor;
+	//uint64_t *nativeTablePtr;
+	
     while (true)
     {
-        MyFunc1(2);
-        MyFunc2("Hello from void* my_thread() (msgcon)\n");
-        sceKernelUsleep(33333);
+        //MyFunc1(2);
+        //MyFunc2("Hello from void* my_thread() (msgcon)\n");
+		
+		/*** code added here ***/
+	    uint64_t *nativeTablePtr = NULL;
+		//memset(&nativeTablePtr, 0, sizeof(nativeTablePtr));
+		memcpy(nativeTablePtr, (startPtr + (0x25E3528 - NO_ASLR_ADDR)), sizeof(nativeTablePtr));
+		if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
+		{
+			// R1 + right d-pad taken from rdr ps3 menu code
+			if (GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RT, 1, 0) && GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RIGHT, 1, 0))
+			{
+				myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+				ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
+			}				
+		}
+		
+        sceKernelUsleep(16666);
     }
     scePthreadExit(NULL);
     return NULL;
@@ -41,15 +63,6 @@ void* my_thread(void* args)
 
 int32_t attr_public plugin_load(int32_t argc, const char* argv[])
 {
-    if (sys_sdk_proc_info(&procInfo) == 0)
-    {
-        print_proc_info();
-    }
-    else
-    {
-        final_printf("Failed to get process info\n");
-        return 0;
-    }
     OrbisPthread thread;
     final_printf("[GoldHEN] %s Plugin Started.\n", g_pluginName);
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
