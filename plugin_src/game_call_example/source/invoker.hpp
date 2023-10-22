@@ -1,3 +1,7 @@
+#pragma once
+
+#include <sys/mman.h>
+
 struct NativeArg_s
 {
 	int* ReturnValue;
