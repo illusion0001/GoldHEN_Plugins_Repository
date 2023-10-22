@@ -11,7 +11,7 @@
 
 #include "plugin_common.h"
 #include <orbis/libkernel.h>
-#include "natives.h"
+#include "natives.hpp"
 
 attr_public const char *g_pluginName = "game_call_example";
 attr_public const char *g_pluginDesc = "Calling game function example";
