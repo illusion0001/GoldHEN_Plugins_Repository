@@ -1,5 +1,7 @@
 #pragma once
 
+#define NATIVE_ADDR 0x25E3528
+
 #include <stdint.h>
 #include <sys/mman.h>
 
@@ -35,8 +37,8 @@ void CallHash(uint32_t hash, NativeArg_s *pArg)
     /*uint32_t l_uiHashTablePointer = 0x1782CE8;
     uint32_t l_uiModulator = *(uint32_t *)0x1782CEC; //== 0x1782CE8 + 0x04*/
     // 1.03 patch
-    uintptr_t l_uiHashTablePointer = 0x25E3528;
-    uint32_t l_uiModulator = *(uint32_t *)0x25E3530;
+    uintptr_t l_uiHashTablePointer = NATIVE_ADDR; // ptr is 64bit on this platform
+    uint32_t l_uiModulator = *(uint32_t *)NATIVE_ADDR + sizeof(uintptr_t);
 
     int32_t index = hash % l_uiModulator;
     uintptr_t l_uiHashTableAddress = *(uintptr_t *)l_uiHashTablePointer;

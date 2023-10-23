@@ -50,7 +50,7 @@ void *my_thread(void *args)
     while (true)
     {
         /*** code added here ***/
-        uintptr_t *nativeTablePtr = (uintptr_t *)(startPtr + (0x25E3528 - NO_ASLR_ADDR));
+        uintptr_t *nativeTablePtr = (uintptr_t *)(startPtr + (NATIVE_ADDR - NO_ASLR_ADDR));
         if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
         {
             // R1 + right d-pad taken from rdr ps3 menu code
