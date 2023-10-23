@@ -45,8 +45,11 @@ void *my_thread(void *args)
 {
     uintptr_t startPtr = procInfo.base_address;
     uint32_t boot_wait = 1;
-    Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
+    // Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
     sleep(boot_wait);
+    NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    Notify(TEX_ICON_SYSTEM, "NativeArg: 0x%p\nnativeArgPtr: 0x%p", NativeArg, nativeArgPtr);
     while (true)
     {
         /*** code added here ***/

@@ -7,9 +7,9 @@
 
 struct NativeArg_s
 {
-    int32_t *ReturnValue;
+    uintptr_t *ReturnValue;
     uint32_t ArgCount;
-    int32_t *ArgValues;
+    uintptr_t *ArgValues;
     uint32_t ReadCount;
 };
 
@@ -20,8 +20,8 @@ struct Native_s
 };
 
 // static NativeArg_s* NativeArg = (NativeArg_s*)0x10060000;
-static NativeArg_s *NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-static int32_t *nativeArgPtr = (int32_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+static NativeArg_s *NativeArg = NULL;
+static uintptr_t *nativeArgPtr = NULL;
 
 void ResetArgs()
 {
