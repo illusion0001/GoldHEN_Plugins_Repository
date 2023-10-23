@@ -48,9 +48,9 @@ void* my_thread(void* args)
 			// R1 + right d-pad taken from rdr ps3 menu code
 			if (GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RT, 1, 0) && GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RIGHT, 1, 0))
 			{
-	/** added **/
-				Player myPlayer;
-				Actor myActor;
+				/** added **/
+				Player myPlayer{};
+				Actor myActor{};
 				myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
 				ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
 			}				
