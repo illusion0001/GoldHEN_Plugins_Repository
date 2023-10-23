@@ -50,7 +50,7 @@ void CallHash(uint32_t hash, NativeArg_s *pArg)
         if (table.nativeHash == hash)
         {
             // if (table.nativeFunction != 0 && table.nativeFunction != 0xCDCDCDCD)
-            if (table.nativeFunction != 0 && table.nativeFunction != 0x00000000)
+            if (table.nativeFunction&& table.nativeFunction)
             {
                 ((void (*)(NativeArg_s *))table.nativeFunction)(pArg);
                 return;
