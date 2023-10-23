@@ -14,7 +14,7 @@ struct NativeArg_s
 struct Native_s
 {
     uint32_t nativeHash;
-    uint32_t nativeFunction;
+    uintptr_t nativeFunction;
 };
 
 // static NativeArg_s* NativeArg = (NativeArg_s*)0x10060000;
