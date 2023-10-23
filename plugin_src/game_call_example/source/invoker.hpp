@@ -16,6 +16,7 @@ struct NativeArg_s
 struct Native_s
 {
     uint32_t nativeHash;
+    uint32_t nativeHash2;
     uintptr_t nativeFunction;
 };
 

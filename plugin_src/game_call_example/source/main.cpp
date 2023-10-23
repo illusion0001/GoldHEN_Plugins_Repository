@@ -43,9 +43,18 @@ void Notify(const char *IconUri, const char *FMT, ...)
 
 void *my_thread(void *args)
 {
+    bzero(&procInfo, sizeof(procInfo));
+    if (sys_sdk_proc_info(&procInfo) == 0)
+    {
+        print_proc_info();
+    }
+    else
+    {
+        Notify(TEX_ICON_SYSTEM, "Failed to get process info");
+    }
     uintptr_t startPtr = procInfo.base_address;
-    uint32_t boot_wait = 1;
-    // Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
+    uint32_t boot_wait = 60;
+    Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
     sleep(boot_wait);
     NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -54,21 +63,26 @@ void *my_thread(void *args)
     {
         /*** code added here ***/
         uintptr_t *nativeTablePtr = (uintptr_t *)(startPtr + (NATIVE_ADDR - NO_ASLR_ADDR));
+        printf("nativeTablePtr: 0x%p\n", nativeTablePtr);
         if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
         {
-            // R1 + right d-pad taken from rdr ps3 menu code
-            if (GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RT, 1, 0) && GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RIGHT, 1, 0))
+            printf("*nativeTablePtr: 0x%p\n", *nativeTablePtr);
+            Player myPlayer{};
+            Actor myActor{};
+            puts("========================================");
+            puts("before call");
+            printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
+            myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+            puts("after call");
+            printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
+            puts("========================================");
+            if (myActor)
             {
-                Notify(TEX_ICON_SYSTEM, "INPUT_FRONTEND_RT and INPUT_FRONTEND_RIGHT");
-                /** added **/
-                Player myPlayer{};
-                Actor myActor{};
-                myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
-                Notify(TEX_ICON_SYSTEM, "myPlayer: %i\nmyActor: %i", myPlayer, myActor);
                 ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
             }
         }
-
+        printf("wait for %d\n", 16666);
+        //puts("16666");
         sceKernelUsleep(16666);
     }
     scePthreadExit(NULL);
