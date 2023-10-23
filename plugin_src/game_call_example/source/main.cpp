@@ -21,11 +21,29 @@ attr_public uint32_t g_pluginVersion = 0x00000100; // 1.00
 struct proc_info procInfo;
 #define NO_ASLR_ADDR 0x00400000
 
+#include <Common.h>
+
+void Notify(const char *IconUri, const char *FMT, ...)
+{
+    OrbisNotificationRequest Buffer{};
+    va_list args;
+    va_start(args, FMT);
+    vsprintf(Buffer.message, FMT, args);
+    va_end(args);
+    final_printf("Notify message:\n%s\n", Buffer.message);
+    Buffer.type = NotificationRequest;
+    Buffer.unk3 = 0;
+    Buffer.useIconImageUri = 1;
+    Buffer.targetId = -1;
+    strcpy(Buffer.iconUri, IconUri);
+    sceKernelSendNotificationRequest(0, &Buffer, sizeof(Buffer), 0);
+}
+
 void *my_thread(void *args)
 {
     uintptr_t startPtr = procInfo.base_address;
     uint32_t boot_wait = 10;
-    final_printf("Sleeping for %u seconds...\n", boot_wait);
+    Notify("Sleeping for %u seconds...", boot_wait);
     sleep(boot_wait);
     while (true)
     {
