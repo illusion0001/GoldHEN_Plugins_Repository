@@ -23,14 +23,14 @@ struct proc_info procInfo;
 
 void *my_thread(void *args)
 {
-    uint64_t startPtr = procInfo.base_address;
+    uintptr_t startPtr = procInfo.base_address;
     uint32_t boot_wait = 10;
     final_printf("Sleeping for %u seconds...\n", boot_wait);
     sleep(boot_wait);
     while (true)
     {
         /*** code added here ***/
-        uint64_t *nativeTablePtr = (uint64_t *)(startPtr + (0x25E3528 - NO_ASLR_ADDR));
+        uintptr_t *nativeTablePtr = (uintptr_t *)(startPtr + (0x25E3528 - NO_ASLR_ADDR));
         if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
         {
             // R1 + right d-pad taken from rdr ps3 menu code
