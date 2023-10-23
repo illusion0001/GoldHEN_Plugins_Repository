@@ -53,7 +53,7 @@ void *my_thread(void *args)
         Notify(TEX_ICON_SYSTEM, "Failed to get process info");
     }
     uintptr_t startPtr = procInfo.base_address;
-    uint32_t boot_wait = 60;
+    uint32_t boot_wait = 10;
     Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
     sleep(boot_wait);
     NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -72,13 +72,19 @@ void *my_thread(void *args)
             puts("========================================");
             puts("before call");
             printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
-            myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
-            puts("after call");
-            printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
-            puts("========================================");
-            if (myActor)
+            myPlayer = PLAYER::GET_LOCAL_SLOT();
+            printf("After PLAYER::GET_LOCAL_SLOT(): %d\n", myPlayer);
+            if (myPlayer != -1)
             {
-                ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
+                puts("if (myPlayer != -1)");
+                myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+                puts("after call");
+                printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
+                puts("========================================");
+                if (myActor)
+                {
+                    ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
+                }
             }
         }
         printf("wait for %d\n", 16666);
