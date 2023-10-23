@@ -39,11 +39,13 @@ void Notify(const char *IconUri, const char *FMT, ...)
     sceKernelSendNotificationRequest(0, &Buffer, sizeof(Buffer), 0);
 }
 
+#define TEX_ICON_SYSTEM "cxml://psnotification/tex_icon_system"
+
 void *my_thread(void *args)
 {
     uintptr_t startPtr = procInfo.base_address;
-    uint32_t boot_wait = 10;
-    Notify("Sleeping for %u seconds...", boot_wait);
+    uint32_t boot_wait = 1;
+    Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
     sleep(boot_wait);
     while (true)
     {
@@ -54,10 +56,12 @@ void *my_thread(void *args)
             // R1 + right d-pad taken from rdr ps3 menu code
             if (GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RT, 1, 0) && GAME::IS_BUTTON_PRESSED(0, INPUT_FRONTEND_RIGHT, 1, 0))
             {
+                Notify(TEX_ICON_SYSTEM, "INPUT_FRONTEND_RT and INPUT_FRONTEND_RIGHT");
                 /** added **/
                 Player myPlayer{};
                 Actor myActor{};
                 myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+                Notify(TEX_ICON_SYSTEM, "myPlayer: %i\nmyActor: %i", myPlayer, myActor);
                 ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
             }
         }
