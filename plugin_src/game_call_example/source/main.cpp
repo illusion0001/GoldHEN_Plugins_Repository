@@ -44,42 +44,19 @@ void Notify(const char *IconUri, const char *FMT, ...)
 uintptr_t script_addr = 0;
 float old_delta = 0.f;
 
-extern "C" void pthread_script_hook(float delta_time)
+void (*pthread_script)() = nullptr;
+
+HOOK_INIT(pthread_script);
+
+extern "C" void pthread_script_hook()
 {
-    old_delta = delta_time;
-    uintptr_t *nativeTablePtr = (uintptr_t *)(procInfo.base_address + (NATIVE_ADDR - NO_ASLR_ADDR));
-    if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
+    uintptr_t pthread_addr = *(uintptr_t *)(procInfo.base_address + (0x025e6598 - NO_ASLR_ADDR));
+    printf("pthread_addr: 0x%lx\n", pthread_addr);
+    if (pthread_addr)
     {
-        Player myPlayer{};
-        Actor myActor{};
-        myPlayer = PLAYER::GET_LOCAL_SLOT();
-        if (myPlayer != -1)
-        {
-            myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
-            if (myActor)
-            {
-                ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
-            }
-        }
+        OrbisPthreadMutex *old_pthread = (OrbisPthreadMutex *)pthread_addr;
+        scePthreadMutexUnlock(old_pthread);
     }
-}
-
-extern "C" void no_addr()
-{
-    Notify(TEX_ICON_SYSTEM, "script_addr: 0x%lx!!", script_addr);
-}
-
-void __attribute__((naked)) script_hook_enter()
-{
-    __asm__(".intel_syntax noprefix\n"
-            "vmovss dword ptr [rip + old_delta], xmm0\n"
-            "call pthread_script_hook\n"
-            "vmovss xmm0, dword ptr [rip + old_delta]\n"
-            "jmp qword ptr [rip + script_addr]\n"
-            "crash_me:\n"
-            "call no_addr\n"
-            "ud2\n"
-            ".att_syntax");
 }
 
 void sys_proc_rw(void* Address, void *Data, u64 Length)
@@ -109,13 +86,23 @@ void *my_thread(void *args)
         Notify(TEX_ICON_SYSTEM, "Failed to get process info");
     }
     uintptr_t startPtr = procInfo.base_address;
-    script_addr = *(uintptr_t*)(startPtr + ((0x1E09E08+0x30) - NO_ASLR_ADDR));
-    if (script_addr)
+    NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (NativeArg && nativeArgPtr)
     {
-        uint64_t hook_addr = (uint64_t)(void *)script_hook_enter;
-        sys_proc_rw((void*)(startPtr + ((0x1E09E08+0x30) - NO_ASLR_ADDR)), &hook_addr, sizeof(void*));
-        NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        uint8_t hook_array[16] = {
+            0xFF, 0x15, 0x02, 0x00, 0x00, 0x00,            // call qword ptr [$+6]
+            0xEB, 0x08, // jmp +8
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // ptr
+        };
+        uint8_t nop = 0x90;
+        for (uint32_t i = 0; i < sizeof(hook_array) + 1; i++)
+        {
+            sys_proc_rw((void*)(procInfo.base_address + (0x005f07d1 - NO_ASLR_ADDR)+i), &nop, 1);
+        }
+        sys_proc_rw((void*)(procInfo.base_address + (0x005f07d1 - NO_ASLR_ADDR)), hook_array, sizeof(hook_array));
+        uint64_t hook_addr = (uint64_t)(void *)pthread_script_hook;
+        sys_proc_rw((void*)(procInfo.base_address + (0x005f07d1 - NO_ASLR_ADDR)+8), &hook_addr, sizeof(hook_addr));
     }
     scePthreadExit(NULL);
     return NULL;
