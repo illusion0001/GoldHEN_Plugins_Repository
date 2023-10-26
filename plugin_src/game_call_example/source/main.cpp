@@ -51,11 +51,38 @@ HOOK_INIT(pthread_script);
 extern "C" void pthread_script_hook()
 {
     uintptr_t pthread_addr = *(uintptr_t *)(procInfo.base_address + (0x025e6598 - NO_ASLR_ADDR));
-    printf("pthread_addr: 0x%lx\n", pthread_addr);
+    /// printf("pthread_addr: 0x%lx\n", pthread_addr);
     if (pthread_addr)
     {
         OrbisPthreadMutex *old_pthread = (OrbisPthreadMutex *)pthread_addr;
         scePthreadMutexUnlock(old_pthread);
+    }
+    /*** code added here ***/
+    uintptr_t *nativeTablePtr = (uintptr_t *)(procInfo.base_address + (NATIVE_ADDR - NO_ASLR_ADDR));
+    // printf("nativeTablePtr: 0x%p\n", nativeTablePtr);
+    if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
+    {
+        // printf("*nativeTablePtr: 0x%lx\n", *nativeTablePtr);
+        Player myPlayer{};
+        Actor myActor{};
+        // puts("========================================");
+        // puts("before call");
+        // printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
+        // slow!
+        myPlayer = PLAYER::GET_LOCAL_SLOT();
+        // printf("After PLAYER::GET_LOCAL_SLOT(): %d\n", myPlayer);
+        if (myPlayer != -1)
+        {
+            puts("if (myPlayer != -1)");
+            myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+            puts("after call");
+            printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
+            puts("========================================");
+            if (myActor)
+            {
+                ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
+            }
+        }
     }
 }
 
