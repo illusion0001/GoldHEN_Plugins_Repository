@@ -20,9 +20,8 @@ struct Native_s
     uintptr_t nativeFunction;
 };
 
-// static NativeArg_s* NativeArg = (NativeArg_s*)0x10060000;
-static NativeArg_s *NativeArg = NULL;
-static uintptr_t *nativeArgPtr = NULL;
+static NativeArg_s* NativeArg = nullptr;
+static uintptr_t *nativeArgPtr = nullptr;
 
 void ResetArgs()
 {

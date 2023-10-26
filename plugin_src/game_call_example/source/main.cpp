@@ -41,6 +41,62 @@ void Notify(const char *IconUri, const char *FMT, ...)
 
 #define TEX_ICON_SYSTEM "cxml://psnotification/tex_icon_system"
 
+uintptr_t script_addr = 0;
+float old_delta = 0.f;
+
+extern "C" void pthread_script_hook(float delta_time)
+{
+    old_delta = delta_time;
+    uintptr_t *nativeTablePtr = (uintptr_t *)(procInfo.base_address + (NATIVE_ADDR - NO_ASLR_ADDR));
+    if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
+    {
+        Player myPlayer{};
+        Actor myActor{};
+        myPlayer = PLAYER::GET_LOCAL_SLOT();
+        if (myPlayer != -1)
+        {
+            myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
+            if (myActor)
+            {
+                ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
+            }
+        }
+    }
+}
+
+extern "C" void no_addr()
+{
+    Notify(TEX_ICON_SYSTEM, "script_addr: 0x%lx!!", script_addr);
+}
+
+void __attribute__((naked)) script_hook_enter()
+{
+    __asm__(".intel_syntax noprefix\n"
+            "vmovss dword ptr [rip + old_delta], xmm0\n"
+            "call pthread_script_hook\n"
+            "vmovss xmm0, dword ptr [rip + old_delta]\n"
+            "jmp qword ptr [rip + script_addr]\n"
+            "crash_me:\n"
+            "call no_addr\n"
+            "ud2\n"
+            ".att_syntax");
+}
+
+void sys_proc_rw(void* Address, void *Data, u64 Length)
+{
+    if (!Address || !Length)
+    {
+        final_printf("No target (0x%p) or length (%li) provided!\n", Address, Length);
+        return;
+    }
+    struct proc_rw process_rw_data{};
+    process_rw_data.address = (uint64_t)Address;
+    process_rw_data.data = Data;
+    process_rw_data.length = Length;
+    process_rw_data.write_flags = 1;
+    sys_sdk_proc_rw(&process_rw_data);
+}
+
 void *my_thread(void *args)
 {
     bzero(&procInfo, sizeof(procInfo));
@@ -53,43 +109,13 @@ void *my_thread(void *args)
         Notify(TEX_ICON_SYSTEM, "Failed to get process info");
     }
     uintptr_t startPtr = procInfo.base_address;
-    uint32_t boot_wait = 10;
-    Notify(TEX_ICON_SYSTEM, "Sleeping for %u seconds...", boot_wait);
-    sleep(boot_wait);
-    NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-    Notify(TEX_ICON_SYSTEM, "NativeArg: 0x%p\nnativeArgPtr: 0x%p", NativeArg, nativeArgPtr);
-    while (true)
+    script_addr = *(uintptr_t*)(startPtr + ((0x1E09E08+0x30) - NO_ASLR_ADDR));
+    if (script_addr)
     {
-        /*** code added here ***/
-        uintptr_t *nativeTablePtr = (uintptr_t *)(startPtr + (NATIVE_ADDR - NO_ASLR_ADDR));
-        printf("nativeTablePtr: 0x%p\n", nativeTablePtr);
-        if (nativeTablePtr && *nativeTablePtr) // if the table ptr actually has a value in game mem
-        {
-            printf("*nativeTablePtr: 0x%p\n", *nativeTablePtr);
-            Player myPlayer{};
-            Actor myActor{};
-            puts("========================================");
-            puts("before call");
-            printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
-            myPlayer = PLAYER::GET_LOCAL_SLOT();
-            printf("After PLAYER::GET_LOCAL_SLOT(): %d\n", myPlayer);
-            if (myPlayer != -1)
-            {
-                puts("if (myPlayer != -1)");
-                myActor = PLAYER::GET_PLAYER_ACTOR(myPlayer);
-                puts("after call");
-                printf("myPlayer: %d\nmyActor: %d\n", myPlayer, myActor);
-                puts("========================================");
-                if (myActor)
-                {
-                    ACTORINFO::SET_ACTOR_DRUNK(myActor, true);
-                }
-            }
-        }
-        printf("wait for %d\n", 16666);
-        //puts("16666");
-        sceKernelUsleep(16666);
+        uint64_t hook_addr = (uint64_t)(void *)script_hook_enter;
+        sys_proc_rw((void*)(startPtr + ((0x1E09E08+0x30) - NO_ASLR_ADDR)), &hook_addr, sizeof(void*));
+        NativeArg = (NativeArg_s *)mmap(0, sizeof(NativeArg), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        nativeArgPtr = (uintptr_t *)mmap(0, sizeof(nativeArgPtr), PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     }
     scePthreadExit(NULL);
     return NULL;
