@@ -126,7 +126,7 @@ void sys_proc_rw(u64 Address, void *Data, u64 Length)
         final_printf("No target (0x%lx) or length (%li) provided!\n", Address, Length);
         return;
     }
-#if 0
+#if 1
     sceKernelMprotect((void*)Address, Length, VM_PROT_ALL);
     memcpy((void*)Address, Data, Length);
 #else
