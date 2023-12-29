@@ -226,7 +226,7 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
     }
 }
 
-int32_t attr_module_hidden module_start(size_t argc, const void *args)
+int32_t main()
 {
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
     final_printf("[GoldHEN] Plugin Author(s): %s\n", g_pluginAuth);
@@ -335,8 +335,25 @@ int32_t attr_module_hidden module_start(size_t argc, const void *args)
     }
 
     if (config != NULL)
+    {
         ini_table_destroy(config);
+    }
+    return 0;
+}
 
+HOOK_INIT(sceCoredumpRegisterCoredumpHandler);
+
+int sceCoredumpRegisterCoredumpHandler();
+
+int32_t sceCoredumpRegisterCoredumpHandler_hook()
+{
+    main();
+    return 0;
+}
+
+int32_t attr_module_hidden module_start(size_t argc, const void *args)
+{
+    HOOK32(sceCoredumpRegisterCoredumpHandler);
     return 0;
 }
 
@@ -344,5 +361,6 @@ int32_t attr_module_hidden module_stop(size_t argc, const void *args)
 {
     final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
     final_printf("Plugin Manager ended successfully\n");
+    UNHOOK(sceCoredumpRegisterCoredumpHandler);
     return 0;
 }
