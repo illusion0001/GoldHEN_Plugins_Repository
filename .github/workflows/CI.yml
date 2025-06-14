@@ -25,19 +25,19 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
       with:
         fetch-depth: 0
         submodules: recursive
 
     - name: Checkout SDK
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
       with:
         repository: GoldHEN/GoldHEN_Plugins_SDK
         path: SDK
 
     - name: Checkout mxml
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
       with:
         repository: illusion0001/mxml
         ref: clang-14
@@ -70,35 +70,39 @@ jobs:
       run: make DEBUG=1
 
     - name: Upload modules (Release prx)
-      uses: actions/upload-artifact@v3
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@main
       with:
         name: goldplugins_${{ env.commit_ver }}-${{ env.commit_hash }}_prx_final
         path: bin/plugins/prx_final/*.prx
         if-no-files-found: error
 
     - name: Upload modules (Release elf symbols)
-      uses: actions/upload-artifact@v3
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@main
       with:
         name: goldplugins_${{ env.commit_ver }}-${{ env.commit_hash }}_elf_final
         path: bin/plugins/elf_final/*.elf
         if-no-files-found: error
 
     - name: Upload modules (Debug prx)
-      uses: actions/upload-artifact@v3
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@main
       with:
         name: goldplugins_${{ env.commit_ver }}-${{ env.commit_hash }}_prx_debug
         path: bin/plugins/prx_debug/*.prx
         if-no-files-found: error
 
     - name: Upload modules (Debug elf symbols)
-      uses: actions/upload-artifact@v3
+      if: github.event_name == 'pull_request'
+      uses: actions/upload-artifact@main
       with:
         name: goldplugins_${{ env.commit_ver }}-${{ env.commit_hash }}_elf_debug
         path: bin/plugins/elf_debug/*.elf
         if-no-files-found: error
 
     - name: Prepare Release
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name != 'pull_request'
       run: |
         # Excluding non user related plugins from release
         BUILD=plugins
@@ -112,9 +116,7 @@ jobs:
         FILES="$BUILD/*.prx"
         for f in $FILES
         do
-        if  [[ "$f" == "$BUILD/game_call_example.prx" ]] ||
-            [[ "$f" == "$BUILD/plugin_loader.prx" ]] ||
-            [[ "$f" == "$BUILD/plugin_template.prx" ]]; then
+        if  [[ "$f" == "$BUILD/game_call_example.prx" ]]; then
             echo "[+] Skipping $f"
             rm $f
             continue
@@ -154,8 +156,10 @@ jobs:
         echo "</details>" >> hash.md
 
     - name: Create Release
-      if: github.event_name == 'workflow_dispatch'
+      if: github.event_name != 'pull_request'
       working-directory: bin/plugins
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: gh release create ${{ env.commit_ver }} ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t "${{ env.commit_ver }}" -F hash.md
+      run: |
+        tt="${{ env.commit_ver }}-${{ env.commit_hash }}"
+        gh release create $tt ${{ env.ZIP_NAME }}.zip --target ${{ GITHUB.SHA }} -t $tt -F hash.md -p
