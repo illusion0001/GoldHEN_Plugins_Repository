@@ -23,18 +23,18 @@
 attr_public const char *g_pluginName = "plugin_loader";
 attr_public const char *g_pluginDesc = "Plugin loader for GoldHEN";
 attr_public const char *g_pluginAuth = "Ctn123, illusion";
-attr_public u32 g_pluginVersion = 0x00000110; // 1.10
+attr_public u32 g_pluginVersion = 0x00000200; // 2.00
 
-char g_PluginDetails[256] = {0};
+static char g_PluginDetails[256] = {0};
 
 // Todo: Move to sdk.
-bool file_exists(const char* filename)
+static bool file_exists(const char *filename)
 {
     struct stat buff;
     return stat(filename, &buff) == 0 ? true : false;
 }
 
-void create_template_config(void)
+static void create_template_config(void)
 {
     final_printf("Creating new %s file\n", PLUGIN_CONFIG_PATH);
     // compile time
@@ -72,7 +72,7 @@ void create_template_config(void)
     sceKernelClose(f);
 }
 
-bool simple_get_bool(const char* val)
+static bool simple_get_bool(const char *val)
 {
     if (val == NULL || val[0] == 0)
     {
@@ -91,7 +91,7 @@ bool simple_get_bool(const char* val)
     return true;
 }
 
-size_t strncat_s(char* dest, size_t destSize, const char* source, size_t source_count)
+static size_t strncat_s(char *dest, size_t destSize, const char *source, size_t source_count)
 {
     if (dest == NULL || destSize == 0 || source == NULL || source_count == 0)
     {
@@ -121,7 +121,7 @@ size_t strncat_s(char* dest, size_t destSize, const char* source, size_t source_
     return destLen + copyLen;
 }
 
-void load_plugins(ini_section_s *section, uint32_t *load_count)
+static void load_plugins(ini_section_s *section, uint32_t *load_count, int argc, char **argv)
 {
     bool notifi_shown = false;
     for (uint32_t j = 0; j < section->size; j++)
@@ -164,8 +164,8 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
             bool load_success = false;
             const char** ModuleName = NULL;
             // TODO: accept user provided arguments
-            int32_t(*plugin_load_ret)(void) = NULL;
-            int32_t(*plugin_unload_ret)(void) = NULL;
+            int32_t (*plugin_load_ret)(int, char **) = NULL;
+            int32_t (*plugin_unload_ret)(int, char **) = NULL;
             ret = sceKernelDlsym(result, "g_pluginName", (void**)&ModuleName);
             final_printf("Loaded Plugin %s\n", entry->key);
             final_printf("Plugin Handle 0x%08x Dlsym 0x%08x\n", result, ret);
@@ -176,12 +176,12 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
             if (plugin_load_ret && plugin_unload_ret)
             {
                 final_printf("Starting plugin...\n");
-                int32_t prx_ret = plugin_load_ret();
+                int32_t prx_ret = plugin_load_ret(argc,argv);
                 final_printf("plugin_load returned with 0x%08x\n", prx_ret);
                 if (prx_ret || prx_ret < 0)
                 {
                     final_printf("Program returned non zero, Starting plugin_unload...\n");
-                    int32_t prx_ret = plugin_unload_ret();
+                    int32_t prx_ret = plugin_unload_ret(argc, argv);
                     final_printf("plugin_unload returned with 0x%08x\n", prx_ret);
                 }
                 else if (prx_ret == 0)
@@ -226,16 +226,12 @@ void load_plugins(ini_section_s *section, uint32_t *load_count)
     }
 }
 
-int32_t attr_module_hidden module_start(size_t argc, const void *args)
+static int load(int *argc, char **argv)
 {
-    final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
-    final_printf("[GoldHEN] Plugin Author(s): %s\n", g_pluginAuth);
-    boot_ver();
-
     // Better done in GoldHEN
     mkdir(PLUGIN_PATH, 0777);
 
-    struct proc_info procInfo;
+    struct proc_info procInfo = {0};
 
     if (sys_sdk_proc_info(&procInfo) == 0)
     {
@@ -309,12 +305,12 @@ int32_t attr_module_hidden module_start(size_t argc, const void *args)
         if (strcmp(section->name, PLUGIN_DEFAULT_SECTION) == 0)
         {
             final_printf("Section [%s] is default\n", section->name);
-            load_plugins(section, &load_count);
+            load_plugins(section, &load_count, *argc, argv);
         }
         else if (strcmp(section->name, procInfo.titleid) == 0)
         {
             final_printf("Section is TitleID [%s]\n", procInfo.titleid);
-            load_plugins(section, &load_count);
+            load_plugins(section, &load_count, *argc, argv);
         }
     }
 
@@ -335,8 +331,102 @@ int32_t attr_module_hidden module_start(size_t argc, const void *args)
     }
 
     if (config != NULL)
+    {
         ini_table_destroy(config);
+    }
+    return 0;
+}
 
+static s32 get_module_info(const char *name, OrbisKernelModuleInfo *module_out, uint32_t *handle_out)
+{
+    OrbisKernelModule handles[256] = {0};
+    size_t numModules = 0;
+    s32 ret = 0;
+    ret = sceKernelGetModuleList(handles, sizeof(handles), &numModules);
+    if (ret)
+    {
+        final_printf("sceKernelGetModuleList (0x%08x)\n", ret);
+        return ret;
+    }
+    final_printf("numModules: %li\n", numModules);
+    for (size_t i = 0; i < numModules; ++i)
+    {
+        struct OrbisKernelModuleInfo moduleInfo = {0};
+        moduleInfo.size = sizeof(moduleInfo);
+        ret = sceKernelGetModuleInfo(handles[i], &moduleInfo);
+        final_printf("ret 0x%x\n", ret);
+        final_printf("module %d\n", handles[i]);
+        final_printf("name: %s\n", moduleInfo.name);
+        final_printf("start: 0x%lx\n", (uint64_t)moduleInfo.segmentInfo[0].address);
+        final_printf("size: %u (0x%08x) bytes\n", moduleInfo.segmentInfo[0].size, moduleInfo.segmentInfo[0].size);
+        if (ret)
+        {
+            final_printf("sceKernelGetModuleInfo (%X)\n", ret);
+            return ret;
+        }
+        if (strstr(moduleInfo.name, name) || name[0] == '0')
+        {
+            if (module_out && handle_out)
+            {
+                memcpy(module_out, &moduleInfo, sizeof(*module_out));
+                *handle_out = handles[i];
+                return 1;
+            }
+        }
+    }
+    return 0;
+}
+
+static void sys_proc_rw(u64 Address, const void *Data, u64 Length)
+{
+    if (!Address || !Length)
+    {
+        final_printf("No target (0x%lx) or length (%li) provided!\n", Address, Length);
+        return;
+    }
+    struct proc_rw process_rw_data = {};
+    process_rw_data.address = Address;
+    process_rw_data.data = (void *)Data;
+    process_rw_data.length = Length;
+    process_rw_data.write_flags = 1;
+    sys_sdk_proc_rw(&process_rw_data);
+}
+
+static void jump64(uintptr_t source, uintptr_t target)
+{
+    static const uint8_t p[] = {0xFF, 0x25, 0x00, 0x00, 0x00, 0x00};
+    sys_proc_rw(source, p, sizeof(p));
+    sys_proc_rw(source + sizeof(p), &target, sizeof(target));
+}
+
+static void patch_libc()
+{
+    struct OrbisKernelModuleInfo info = {};
+    uint32_t handle = 0;
+    static const char init_env_sym[] = "_init_env";
+    static const char libc_mod[] = "libc.prx";
+    if (get_module_info(libc_mod, &info, &handle) == 1)
+    {
+        uintptr_t init = 0;
+        sceKernelDlsym(handle, init_env_sym, (void **)&init);
+        if (init)
+        {
+            jump64(init, (uintptr_t)load);
+        }
+    }
+    else
+    {
+        static const char padding[] = "========";
+        final_printf("%s %s symbol %s not found! %s\n", padding, libc_mod, init_env_sym, padding);
+    }
+}
+
+int32_t attr_module_hidden module_start(size_t argc, const void *args)
+{
+    final_printf("[GoldHEN] <%s\\Ver.0x%08x> %s\n", g_pluginName, g_pluginVersion, __func__);
+    final_printf("[GoldHEN] Plugin Author(s): %s\n", g_pluginAuth);
+    boot_ver();
+    patch_libc();
     return 0;
 }
 
